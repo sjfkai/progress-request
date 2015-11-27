@@ -10,7 +10,7 @@ var Promise = require('bluebird');
  * @param  {Function} cb  callback
  * @return {Promiss || null}       [description]
  */
-function porgressRequest(url,opt,cb){
+function porgressRequest(url,opts,cb) {
 	if (typeof opts === 'function') {
 		cb = opts;
 		opts = {};
@@ -24,8 +24,10 @@ function porgressRequest(url,opt,cb){
 	try {
 		return asPromise(url, opts);
 	} catch (error) {
+
 		return Promise.reject(error);
 	}
+
 }
 
 function asCallback(url, opts, cb) {
@@ -40,15 +42,15 @@ function asCallback(url, opts, cb) {
 	}).on("response", function(response) {
 
 		fileLength = parseInt(response.headers['content-length']);
-		bar = new ProgressBar('  downloading [:bar] :percent :etas', {
+		bar = new ProgressBar('downloading [:bar] :percent :etas ', {
 			total: fileLength
 		});
-
+		
 	}).on("data", function(chunk) {
 
 		chunks.push(chunk);
 		size += chunk.length;
-		bar.tick(size);
+		bar.tick(chunk.length);
 	}).on("end", function() {
 
 		if (size !== fileLength) {
@@ -57,13 +59,12 @@ function asCallback(url, opts, cb) {
 
 		var buff = Buffer.concat(chunks, size);
 		var data = buff.toString();
-		bar.terminate();
 		cb(null, data);
 	}).on("error", cb);
 
 }
 
-function asPromise(url, opts){
+function asPromise(url, opts) {
 	return new Promise(function(resolve, reject) {
 		asCallback(url, opts, function(e,r){
 			if(e){
@@ -76,5 +77,7 @@ function asPromise(url, opts){
 	});
 
 }
+
+
 
 module.exports = porgressRequest;
